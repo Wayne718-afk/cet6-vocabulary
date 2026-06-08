@@ -1,0 +1,12 @@
+name = "shici-cloud"
+main = "worker.js"
+compatibility_date = "2026-06-08"
+
+[vars]
+FRONTEND_ORIGIN = "https://wayne718-afk.github.io"
+FRONTEND_PATH = "/cet6-vocabulary/"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "shici-cloud"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
