@@ -1,0 +1,11 @@
+{
+  "name": "拾词 · CET-6 词汇检测",
+  "short_name": "拾词",
+  "description": "支持词汇导入和艾宾浩斯复习的 CET-6 学习工具",
+  "lang": "zh-CN",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f2eb",
+  "theme_color": "#183f32"
+}
