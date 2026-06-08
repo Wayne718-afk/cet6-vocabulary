@@ -52,9 +52,17 @@
           <span class="brand-mark">拾</span>
           <strong>拾词</strong>
         </button>
-        <div class="today">
-          <span>今日已检测</span>
-          <strong id="todayReviewed">0</strong>
+        <div class="topbar-actions">
+          <div class="today">
+            <span>今日已检测</span>
+            <strong id="todayReviewed">0</strong>
+          </div>
+          <button class="account-button" id="accountButton" type="button">
+            <span class="account-avatar" id="accountAvatar">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.4a7.2 7.2 0 0 1-7.5 6.9 8.8 8.8 0 0 1-2-.2L6 20l1.1-3.3A6.7 6.7 0 0 1 4 11.4a7.2 7.2 0 0 1 7.5-6.9 7.2 7.2 0 0 1 7.5 6.9Z"/><path d="M9 10h.01M14 10h.01"/></svg>
+            </span>
+            <span id="accountButtonText">微信登录</span>
+          </button>
         </div>
       </header>
 
@@ -286,7 +294,47 @@
     </div>
   </div>
 
+  <div class="modal-backdrop" id="accountModal" hidden>
+    <section class="account-modal" role="dialog" aria-modal="true" aria-labelledby="accountModalTitle">
+      <button class="modal-close" id="closeAccountModal" type="button" aria-label="关闭">×</button>
+
+      <div id="signedOutPanel">
+        <div class="wechat-mark">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.6 12.6a5.8 5.8 0 0 1 6 5.6 5.2 5.2 0 0 1-1.4 3.5l.5 1.8-2.4-1a6.5 6.5 0 0 1-2.7.6 5.8 5.8 0 0 1-6-5.6 5.8 5.8 0 0 1 6-4.9Z"/><path d="M13.2 11.2a6.9 6.9 0 0 0-6.6 6.6v.4a8.1 8.1 0 0 1-1.8-.5l-3 1.2.7-2.3A6.6 6.6 0 0 1 1 12.4C1 8.3 5 5 9.8 5c4.3 0 7.9 2.6 8.6 6.1a7.4 7.4 0 0 0-5.2.1Z"/></svg>
+        </div>
+        <span class="eyebrow">CLOUD LIBRARY</span>
+        <h2 id="accountModalTitle">微信扫码登录</h2>
+        <p>登录后，单词、词组和复习进度会保存到你的云端词库，在不同设备上保持一致。</p>
+        <button class="wechat-login-button" id="wechatLoginButton" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.6 12.6a5.8 5.8 0 0 1 6 5.6 5.2 5.2 0 0 1-1.4 3.5l.5 1.8-2.4-1a6.5 6.5 0 0 1-2.7.6 5.8 5.8 0 0 1-6-5.6 5.8 5.8 0 0 1 6-4.9Z"/><path d="M13.2 11.2a6.9 6.9 0 0 0-6.6 6.6v.4a8.1 8.1 0 0 1-1.8-.5l-3 1.2.7-2.3A6.6 6.6 0 0 1 1 12.4C1 8.3 5 5 9.8 5c4.3 0 7.9 2.6 8.6 6.1a7.4 7.4 0 0 0-5.2.1Z"/></svg>
+          <span>打开微信扫码登录</span>
+        </button>
+        <p class="cloud-status" id="cloudStatus">正在检查云同步服务…</p>
+      </div>
+
+      <div id="signedInPanel" hidden>
+        <div class="profile-heading">
+          <span class="profile-avatar" id="profileAvatar"></span>
+          <div>
+            <span class="eyebrow">SIGNED IN</span>
+            <h2 id="profileName">微信用户</h2>
+          </div>
+        </div>
+        <div class="sync-card">
+          <div>
+            <strong>云端词库</strong>
+            <p id="syncStatus">词库已同步</p>
+          </div>
+          <span class="sync-dot"></span>
+        </div>
+        <button class="primary-button account-action" id="syncNowButton" type="button">立即同步</button>
+        <button class="logout-button" id="logoutButton" type="button">退出登录</button>
+      </div>
+    </section>
+  </div>
+
   <script src="vendor/jszip.min.js"></script>
+  <script src="cloud-config.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
