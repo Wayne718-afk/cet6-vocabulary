@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="一个简洁的 CET-6 单词与词组导入、整理和随机检测工具。">
+  <meta name="theme-color" content="#183f32">
+  <title>拾词 · CET-6 词汇检测</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#" aria-label="拾词首页">
+        <span class="brand-mark">拾</span>
+        <span>
+          <strong>拾词</strong>
+          <small>CET-6 Vocabulary</small>
+        </span>
+      </a>
+
+      <nav class="main-nav" aria-label="主要导航">
+        <button class="nav-item active" data-view="import" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 17v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2"/></svg>
+          <span>导入词汇</span>
+        </button>
+        <button class="nav-item" data-view="quiz" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 9a2.5 2.5 0 1 1 4.3 1.7c-1.15 1.1-1.8 1.55-1.8 3.3m0 4h.01"/><circle cx="12" cy="12" r="9"/></svg>
+          <span>记忆检测</span>
+        </button>
+        <button class="nav-item" data-view="library" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v16H6.5A2.5 2.5 0 0 0 4 21.5v-16Zm16 0A2.5 2.5 0 0 0 17.5 3H13v16h4.5a2.5 2.5 0 0 1 2.5 2.5v-16Z"/></svg>
+          <span>我的词库</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-note">
+        <div class="note-icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.6 2.85 8.9 7 10 4.15-1.1 7-5.4 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg>
+        </div>
+        <div>
+          <strong>本地保存</strong>
+          <p>数据只保存在此浏览器中</p>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <button class="mobile-brand" data-view="import" type="button" aria-label="返回导入页">
+          <span class="brand-mark">拾</span>
+          <strong>拾词</strong>
+        </button>
+        <div class="today">
+          <span>今日已检测</span>
+          <strong id="todayReviewed">0</strong>
+        </div>
+      </header>
+
+      <section class="view active" id="view-import" aria-labelledby="importTitle">
+        <div class="page-heading">
+          <div>
+            <span class="eyebrow">BUILD YOUR LIBRARY</span>
+            <h1 id="importTitle">把词汇收进来，<br><em>慢慢变成自己的。</em></h1>
+            <p>粘贴或上传整理好的内容，拾词会自动分辨单词与词组。</p>
+          </div>
+          <div class="mini-stats" aria-label="词库统计">
+            <div class="mini-stat">
+              <span class="stat-dot word-dot"></span>
+              <div><strong id="wordCount">0</strong><small>个单词</small></div>
+            </div>
+            <div class="mini-stat">
+              <span class="stat-dot phrase-dot"></span>
+              <div><strong id="phraseCount">0</strong><small>个词组</small></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="import-layout">
+          <section class="panel import-panel">
+            <div class="panel-header">
+              <div>
+                <span class="step-number">01</span>
+                <div>
+                  <h2>导入词汇</h2>
+                  <p>每行一条，英文与释义之间用 Tab、逗号、等号或竖线分隔</p>
+                </div>
+              </div>
+              <button class="text-button" id="fillSample" type="button">填入示例</button>
+            </div>
+
+            <div class="drop-zone" id="dropZone">
+              <input id="fileInput" type="file" accept=".txt,.csv,.docx,.xlsx,text/plain,text/csv,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
+              <div class="drop-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0L8 8m4-4 4 4M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg>
+              </div>
+              <div>
+                <strong>拖入文件，或 <button id="chooseFile" type="button">选择文件</button></strong>
+                <span>支持 TXT、CSV、Word（DOCX）和 Excel（XLSX）</span>
+              </div>
+            </div>
+
+            <div class="textarea-wrap">
+              <label for="importText">词汇内容</label>
+              <textarea id="importText" spellcheck="false" placeholder="例如：&#10;abandon, 放弃；抛弃&#10;take into account, 把……考虑在内"></textarea>
+              <div class="textarea-footer">
+                <span id="lineStatus">等待输入</span>
+                <button class="clear-input" id="clearInput" type="button">清空内容</button>
+              </div>
+            </div>
+
+            <div class="import-actions">
+              <div class="auto-rule">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 1.25 3.75L17 8l-3.75 1.25L12 13l-1.25-3.75L7 8l3.75-1.25L12 3Zm6 10 .75 2.25L21 16l-2.25.75L18 19l-.75-2.25L15 16l2.25-.75L18 13Z"/></svg>
+                <span>含空格的英文将自动归入<strong>词组库</strong></span>
+              </div>
+              <button class="primary-button" id="importButton" type="button" disabled>
+                <span>开始导入</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+              </button>
+            </div>
+          </section>
+
+          <aside class="panel format-panel">
+            <span class="step-number">02</span>
+            <h2>整理格式</h2>
+            <p>一行对应一条词汇。以下几种写法都能识别：</p>
+            <div class="format-examples">
+              <code><span>compelling</span><b>,</b> 引人注目的</code>
+              <code><span>in terms of</span><b> = </b>就……而言</code>
+              <code><span>subtle</span><b> | </b>微妙的；细微的</code>
+            </div>
+            <div class="format-tip">
+              <strong>小提示</strong>
+              <p>Word 可使用“英文 + 分隔符 + 释义”或两列表格；Excel 请将英文、释义放在前两列。</p>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="view" id="view-quiz" aria-labelledby="quizTitle">
+        <div class="page-heading compact">
+          <div>
+            <span class="eyebrow">SPACED REPETITION</span>
+            <h1 id="quizTitle">记忆检测</h1>
+            <p>按遗忘规律安排重复，在快要忘记之前再见一次。</p>
+          </div>
+          <div class="session-stats">
+            <span>本轮</span>
+            <strong id="sessionDone">0</strong>
+            <i></i>
+            <span>掌握</span>
+            <strong id="sessionKnown">0</strong>
+          </div>
+        </div>
+
+        <div class="review-settings panel">
+          <div class="review-setting-block">
+            <span class="setting-label">检测方式</span>
+            <div class="segmented-control strategy-control" aria-label="检测方式">
+              <button class="active" data-quiz-strategy="spaced" type="button">记忆复习</button>
+              <button data-quiz-strategy="random" type="button">随机巩固</button>
+            </div>
+          </div>
+          <div class="due-summary">
+            <div><strong id="dueCount">0</strong><span>今日待复习</span></div>
+            <p id="strategyDescription">按 1、2、4、7、15、30、60 天逐步复习</p>
+          </div>
+        </div>
+
+        <div class="quiz-toolbar">
+          <div class="segmented-control" aria-label="检测词库">
+            <button class="active" data-quiz-mode="word" type="button">单词库 <span id="quizWordCount">0</span></button>
+            <button data-quiz-mode="phrase" type="button">词组库 <span id="quizPhraseCount">0</span></button>
+          </div>
+          <button class="subtle-button" id="resetSession" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.34 5.66M20 4v7h-7"/></svg>
+            重置本轮
+          </button>
+        </div>
+
+        <div class="quiz-stage">
+          <div class="quiz-card" id="quizCard">
+            <div class="quiz-card-top">
+              <span class="type-chip" id="quizType">单词</span>
+              <span class="card-counter" id="cardCounter">准备开始</span>
+            </div>
+            <div class="quiz-content">
+              <span class="prompt-label">这个词是什么意思？</span>
+              <h2 id="quizTerm">词库还是空的</h2>
+              <div class="answer" id="quizAnswer" aria-live="polite">
+                <div class="answer-line"></div>
+                <span>释义</span>
+                <p id="quizMeaning">请先导入一些内容，再回来检测。</p>
+              </div>
+            </div>
+            <div class="quiz-footer" id="quizFooter">
+              <button class="reveal-button" id="revealAnswer" type="button" disabled>
+                查看释义
+                <small>空格键</small>
+              </button>
+              <div class="result-actions" id="resultActions">
+                <button class="again-button" id="markAgain" type="button">
+                  <span class="button-symbol">×</span>
+                  还需复习
+                  <small>按 1</small>
+                </button>
+                <button class="known-button" id="markKnown" type="button">
+                  <span class="button-symbol">✓</span>
+                  已经掌握
+                  <small>按 2</small>
+                </button>
+              </div>
+            </div>
+          </div>
+          <p class="quiz-hint" id="quizHint">答对会延长下次复习间隔，答错会回到待复习队列</p>
+        </div>
+      </section>
+
+      <section class="view" id="view-library" aria-labelledby="libraryTitle">
+        <div class="page-heading compact">
+          <div>
+            <span class="eyebrow">YOUR COLLECTION</span>
+            <h1 id="libraryTitle">我的词库</h1>
+            <p>查找、浏览或整理已导入的词汇。</p>
+          </div>
+          <button class="export-button" id="exportLibrary" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v12m0 0-4-4m4 4 4-4M5 19h14"/></svg>
+            导出当前词库
+          </button>
+        </div>
+
+        <section class="panel library-panel">
+          <div class="library-toolbar">
+            <div class="segmented-control library-tabs" aria-label="词库类型">
+              <button class="active" data-library-mode="word" type="button">单词 <span id="libraryWordCount">0</span></button>
+              <button data-library-mode="phrase" type="button">词组 <span id="libraryPhraseCount">0</span></button>
+            </div>
+            <label class="search-box">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg>
+              <input id="librarySearch" type="search" placeholder="搜索英文或释义">
+            </label>
+          </div>
+
+          <div class="list-heading">
+            <span id="librarySummary">共 0 个单词</span>
+            <button class="danger-text" id="clearLibrary" type="button">清空当前词库</button>
+          </div>
+
+          <div class="vocabulary-list" id="vocabularyList"></div>
+
+          <div class="empty-list" id="emptyList">
+            <div class="empty-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v16H6.5A2.5 2.5 0 0 0 4 21.5v-16Zm16 0A2.5 2.5 0 0 0 17.5 3H13v16h4.5a2.5 2.5 0 0 1 2.5 2.5v-16Z"/></svg>
+            </div>
+            <strong>这里还没有内容</strong>
+            <p>导入一些词汇后，它们会整齐地出现在这里。</p>
+            <button class="subtle-button" data-view="import" type="button">去导入</button>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <nav class="mobile-nav" aria-label="移动端导航">
+      <button class="active" data-view="import" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 17v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2"/></svg>
+        <span>导入</span>
+      </button>
+      <button data-view="quiz" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 9a2.5 2.5 0 1 1 4.3 1.7c-1.15 1.1-1.8 1.55-1.8 3.3m0 4h.01"/><circle cx="12" cy="12" r="9"/></svg>
+        <span>检测</span>
+      </button>
+      <button data-view="library" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v16H6.5A2.5 2.5 0 0 0 4 21.5v-16Zm16 0A2.5 2.5 0 0 0 17.5 3H13v16h4.5a2.5 2.5 0 0 1 2.5 2.5v-16Z"/></svg>
+        <span>词库</span>
+      </button>
+    </nav>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <span class="toast-icon">✓</span>
+    <div>
+      <strong id="toastTitle">导入完成</strong>
+      <p id="toastMessage">内容已保存到词库</p>
+    </div>
+  </div>
+
+  <script src="vendor/jszip.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
