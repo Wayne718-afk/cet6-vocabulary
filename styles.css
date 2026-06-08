@@ -204,6 +204,12 @@ svg {
   border-bottom: 1px solid rgba(23, 35, 31, 0.08);
 }
 
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
 .mobile-brand {
   display: none;
   padding: 0;
@@ -223,6 +229,43 @@ svg {
   color: var(--ink);
   font-family: Georgia, serif;
   font-size: 22px;
+}
+
+.account-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px 7px 8px;
+  color: var(--green);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 30px;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.account-avatar {
+  display: grid;
+  width: 29px;
+  height: 29px;
+  overflow: hidden;
+  place-items: center;
+  color: #fff;
+  background: #18a058;
+  border-radius: 50%;
+}
+
+.account-avatar svg {
+  width: 17px;
+  height: 17px;
+}
+
+.account-avatar img,
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .view {
@@ -1317,6 +1360,180 @@ svg {
   font-size: 9px;
 }
 
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  padding: 20px;
+  place-items: center;
+  background: rgba(12, 28, 22, 0.48);
+  backdrop-filter: blur(7px);
+}
+
+.modal-backdrop[hidden] {
+  display: none;
+}
+
+.account-modal {
+  position: relative;
+  width: min(430px, 100%);
+  padding: 38px;
+  background: var(--panel);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 25px;
+  box-shadow: 0 30px 80px rgba(12, 28, 22, 0.27);
+  text-align: center;
+}
+
+.modal-close {
+  position: absolute;
+  top: 14px;
+  right: 15px;
+  display: grid;
+  width: 31px;
+  height: 31px;
+  place-items: center;
+  color: #75817b;
+  background: #f0f1eb;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.wechat-mark {
+  display: grid;
+  width: 62px;
+  height: 62px;
+  margin: 0 auto 20px;
+  place-items: center;
+  color: #fff;
+  background: #18a058;
+  border-radius: 20px;
+}
+
+.wechat-mark svg {
+  width: 35px;
+  height: 35px;
+}
+
+.account-modal h2 {
+  margin: 0;
+  font-family: Georgia, "Noto Serif SC", "Songti SC", serif;
+  font-size: 28px;
+}
+
+.account-modal > div > p {
+  margin: 13px auto 23px;
+  max-width: 330px;
+  color: var(--ink-soft);
+  font-size: 11px;
+  line-height: 1.75;
+}
+
+.wechat-login-button {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 18px;
+  color: #fff;
+  background: #18a058;
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.wechat-login-button:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.wechat-login-button svg {
+  width: 21px;
+  height: 21px;
+}
+
+.account-modal .cloud-status {
+  margin-bottom: 0;
+  color: #89938e;
+  font-size: 9px;
+}
+
+.profile-heading {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 27px;
+  text-align: left;
+}
+
+.profile-heading .eyebrow {
+  margin-bottom: 5px;
+}
+
+.profile-avatar {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  flex: 0 0 auto;
+  overflow: hidden;
+  place-items: center;
+  color: #fff;
+  background: #18a058;
+  border-radius: 50%;
+  font-family: Georgia, serif;
+  font-size: 24px;
+}
+
+.sync-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding: 16px;
+  background: #f2f5ec;
+  border-radius: 13px;
+  text-align: left;
+}
+
+.sync-card strong {
+  font-size: 11px;
+}
+
+.sync-card p {
+  margin: 5px 0 0;
+  color: var(--ink-soft);
+  font-size: 9px;
+}
+
+.sync-dot {
+  width: 9px;
+  height: 9px;
+  background: #18a058;
+  border-radius: 50%;
+  box-shadow: 0 0 0 5px rgba(24, 160, 88, 0.12);
+}
+
+.account-action {
+  width: 100%;
+  justify-content: center;
+}
+
+.logout-button {
+  margin-top: 15px;
+  padding: 5px;
+  color: var(--danger);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-size: 10px;
+}
+
 @media (max-width: 980px) {
   .sidebar {
     width: 210px;
@@ -1381,6 +1598,18 @@ svg {
   .topbar {
     height: 68px;
     justify-content: space-between;
+  }
+
+  .topbar-actions {
+    gap: 11px;
+  }
+
+  .account-button {
+    padding-right: 8px;
+  }
+
+  .account-button > span:last-child {
+    display: none;
   }
 
   .mobile-brand {
@@ -1582,6 +1811,10 @@ svg {
     bottom: 94px;
     left: 18px;
     min-width: 0;
+  }
+
+  .account-modal {
+    padding: 34px 24px 28px;
   }
 }
 
