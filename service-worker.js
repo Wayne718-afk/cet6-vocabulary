@@ -1,9 +1,10 @@
-const CACHE_NAME = "shici-cet6-v2";
+const CACHE_NAME = "shici-cet6-v3";
 const APP_FILES = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
+  "./cloud-config.js",
   "./manifest.webmanifest",
   "./vendor/jszip.min.js"
 ];
