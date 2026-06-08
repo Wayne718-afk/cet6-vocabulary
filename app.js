@@ -1,7 +1,9 @@
 const STORAGE_KEY = "shici-cet6-library-v1";
 const TODAY_KEY = "shici-cet6-today-v1";
+const CLOUD_TOKEN_KEY = "shici-cet6-cloud-token-v1";
 const REVIEW_INTERVALS_DAYS = [1, 2, 4, 7, 15, 30, 60, 120];
 const SUPPORTED_EXTENSIONS = ["txt", "csv", "docx", "xlsx"];
+const CLOUD_API = String(window.SHICI_CLOUD_API || "").replace(/\/$/, "");
 
 const state = {
   entries: loadEntries(),
@@ -14,7 +16,10 @@ const state = {
   revealed: false,
   sessionDone: 0,
   sessionKnown: 0,
-  todayReviewed: loadTodayReviewed()
+  todayReviewed: loadTodayReviewed(),
+  cloudToken: localStorage.getItem(CLOUD_TOKEN_KEY) || "",
+  cloudUser: null,
+  cloudSyncing: false
 };
 
 const elements = {
@@ -29,6 +34,20 @@ const elements = {
   wordCount: document.querySelector("#wordCount"),
   phraseCount: document.querySelector("#phraseCount"),
   todayReviewed: document.querySelector("#todayReviewed"),
+  accountButton: document.querySelector("#accountButton"),
+  accountAvatar: document.querySelector("#accountAvatar"),
+  accountButtonText: document.querySelector("#accountButtonText"),
+  accountModal: document.querySelector("#accountModal"),
+  closeAccountModal: document.querySelector("#closeAccountModal"),
+  signedOutPanel: document.querySelector("#signedOutPanel"),
+  signedInPanel: document.querySelector("#signedInPanel"),
+  wechatLoginButton: document.querySelector("#wechatLoginButton"),
+  cloudStatus: document.querySelector("#cloudStatus"),
+  profileAvatar: document.querySelector("#profileAvatar"),
+  profileName: document.querySelector("#profileName"),
+  syncStatus: document.querySelector("#syncStatus"),
+  syncNowButton: document.querySelector("#syncNowButton"),
+  logoutButton: document.querySelector("#logoutButton"),
   quizWordCount: document.querySelector("#quizWordCount"),
   quizPhraseCount: document.querySelector("#quizPhraseCount"),
   dueCount: document.querySelector("#dueCount"),
@@ -59,6 +78,7 @@ const elements = {
 };
 
 let toastTimer;
+let cloudSyncTimer;
 
 function normalizeEntry(entry) {
   const now = new Date().toISOString();
@@ -75,7 +95,8 @@ function normalizeEntry(entry) {
     lastReviewed: entry.lastReviewed || null,
     reviewStage: stage,
     lapseCount: Number(entry.lapseCount) || 0,
-    nextReviewAt: entry.nextReviewAt || now
+    nextReviewAt: entry.nextReviewAt || now,
+    updatedAt: entry.updatedAt || entry.lastReviewed || entry.createdAt || now
   };
 }
 
@@ -104,8 +125,9 @@ function localDateKey(date = new Date()) {
   return `${year}-${month}-${day}`;
 }
 
-function saveEntries() {
+function saveEntries(options = {}) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state.entries));
+  if (!options.skipCloud) scheduleCloudSync();
 }
 
 function saveTodayReviewed() {
@@ -302,7 +324,8 @@ function importVocabulary() {
       lastReviewed: null,
       reviewStage: 0,
       lapseCount: 0,
-      nextReviewAt: now
+      nextReviewAt: now,
+      updatedAt: now
     });
   });
 
@@ -668,6 +691,7 @@ function markQuizResult(known) {
     entry.reviewCount += 1;
     entry.masteredCount += known ? 1 : 0;
     entry.lastReviewed = new Date().toISOString();
+    entry.updatedAt = entry.lastReviewed;
 
     if (state.quizStrategy === "spaced") {
       if (known) {
@@ -885,6 +909,197 @@ function toCsvField(value) {
     : stringValue;
 }
 
+function scheduleCloudSync() {
+  if (!CLOUD_API || !state.cloudToken || state.cloudSyncing) return;
+  clearTimeout(cloudSyncTimer);
+  cloudSyncTimer = setTimeout(() => pushCloudLibrary(false), 1800);
+  renderSyncStatus("等待同步…");
+}
+
+async function cloudFetch(path, options = {}) {
+  const headers = new Headers(options.headers || {});
+  headers.set("Accept", "application/json");
+  if (options.body) headers.set("Content-Type", "application/json");
+  if (state.cloudToken) headers.set("Authorization", `Bearer ${state.cloudToken}`);
+
+  const response = await fetch(`${CLOUD_API}${path}`, { ...options, headers });
+  const payload = await response.json().catch(() => ({}));
+  if (response.status === 401) {
+    clearCloudSession(false);
+    throw new Error("登录已过期，请重新扫码");
+  }
+  if (!response.ok) {
+    throw new Error(payload.error || "云同步服务暂时不可用");
+  }
+  return payload;
+}
+
+function openAccountModal() {
+  elements.accountModal.hidden = false;
+  document.body.style.overflow = "hidden";
+}
+
+function closeAccountModal() {
+  elements.accountModal.hidden = true;
+  document.body.style.overflow = "";
+}
+
+function renderAccount() {
+  const signedIn = Boolean(state.cloudUser && state.cloudToken);
+  elements.signedOutPanel.hidden = signedIn;
+  elements.signedInPanel.hidden = !signedIn;
+  elements.accountButtonText.textContent = signedIn ? state.cloudUser.nickname || "我的词库" : "微信登录";
+
+  if (signedIn) {
+    const nickname = state.cloudUser.nickname || "微信用户";
+    elements.profileName.textContent = nickname;
+    renderAvatar(elements.accountAvatar, state.cloudUser.avatarUrl, nickname);
+    renderAvatar(elements.profileAvatar, state.cloudUser.avatarUrl, nickname);
+  } else {
+    elements.accountAvatar.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.4a7.2 7.2 0 0 1-7.5 6.9 8.8 8.8 0 0 1-2-.2L6 20l1.1-3.3A6.7 6.7 0 0 1 4 11.4a7.2 7.2 0 0 1 7.5-6.9 7.2 7.2 0 0 1 7.5 6.9Z"/><path d="M9 10h.01M14 10h.01"/></svg>`;
+  }
+}
+
+function renderAvatar(target, avatarUrl, nickname) {
+  target.innerHTML = "";
+  if (avatarUrl) {
+    const image = document.createElement("img");
+    image.src = avatarUrl;
+    image.alt = "";
+    image.referrerPolicy = "no-referrer";
+    target.appendChild(image);
+    return;
+  }
+  target.textContent = nickname.slice(0, 1);
+}
+
+function renderSyncStatus(message) {
+  if (elements.syncStatus) elements.syncStatus.textContent = message;
+}
+
+async function checkCloudAvailability() {
+  if (!CLOUD_API) {
+    elements.wechatLoginButton.disabled = true;
+    elements.cloudStatus.textContent = "管理员尚未配置微信开放平台和云同步服务";
+    return;
+  }
+
+  try {
+    const health = await cloudFetch("/health");
+    elements.wechatLoginButton.disabled = !health.wechatConfigured;
+    elements.cloudStatus.textContent = health.wechatConfigured
+      ? "登录过程由微信开放平台安全完成"
+      : "微信 AppID 和密钥尚未配置";
+  } catch {
+    elements.wechatLoginButton.disabled = true;
+    elements.cloudStatus.textContent = "暂时无法连接云同步服务";
+  }
+}
+
+function beginWechatLogin() {
+  if (!CLOUD_API || elements.wechatLoginButton.disabled) return;
+  const returnTo = `${location.origin}${location.pathname}`;
+  location.href = `${CLOUD_API}/auth/wechat/start?return_to=${encodeURIComponent(returnTo)}`;
+}
+
+async function initializeCloudSession() {
+  const hashParams = new URLSearchParams(location.hash.replace(/^#/, ""));
+  const returnedToken = hashParams.get("wechat_token");
+  const loginError = hashParams.get("wechat_error");
+  if (returnedToken) {
+    state.cloudToken = returnedToken;
+    localStorage.setItem(CLOUD_TOKEN_KEY, returnedToken);
+    history.replaceState(null, "", `${location.pathname}${location.search}`);
+  } else if (loginError) {
+    history.replaceState(null, "", `${location.pathname}${location.search}`);
+    showToast("微信登录失败", loginError, "error");
+  }
+
+  await checkCloudAvailability();
+  if (!state.cloudToken) {
+    renderAccount();
+    return;
+  }
+
+  try {
+    const payload = await cloudFetch("/me");
+    state.cloudUser = payload.user;
+    renderAccount();
+    await pullAndMergeCloudLibrary();
+    if (returnedToken) {
+      showToast("登录成功", "你的词库和复习进度已同步");
+    }
+  } catch (error) {
+    clearCloudSession(false);
+    showToast("云端登录失效", error.message, "error");
+  }
+}
+
+async function pullAndMergeCloudLibrary() {
+  if (!state.cloudToken) return;
+  state.cloudSyncing = true;
+  renderSyncStatus("正在合并本地与云端词库…");
+
+  try {
+    const payload = await cloudFetch("/library");
+    const cloudEntries = Array.isArray(payload.entries) ? payload.entries.map(normalizeEntry) : [];
+    state.entries = mergeEntries(state.entries, cloudEntries);
+    saveEntries({ skipCloud: true });
+    renderCounts();
+    renderLibrary();
+    resetQuizQueue();
+    state.cloudSyncing = false;
+    await pushCloudLibrary(false);
+  } finally {
+    state.cloudSyncing = false;
+  }
+}
+
+function mergeEntries(localEntries, cloudEntries) {
+  const merged = new Map();
+  [...cloudEntries, ...localEntries].forEach((entry) => {
+    const normalized = normalizeEntry(entry);
+    const key = `${normalized.type}:${normalized.term.toLocaleLowerCase()}`;
+    const existing = merged.get(key);
+    if (!existing || Date.parse(normalized.updatedAt) >= Date.parse(existing.updatedAt)) {
+      merged.set(key, normalized);
+    }
+  });
+  return [...merged.values()];
+}
+
+async function pushCloudLibrary(showFeedback = true) {
+  if (!state.cloudToken || state.cloudSyncing) return;
+  clearTimeout(cloudSyncTimer);
+  state.cloudSyncing = true;
+  elements.syncNowButton.disabled = true;
+  renderSyncStatus("正在同步…");
+
+  try {
+    const payload = await cloudFetch("/library", {
+      method: "PUT",
+      body: JSON.stringify({ entries: state.entries })
+    });
+    renderSyncStatus(`已同步 ${payload.count} 条词汇 · ${new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })}`);
+    if (showFeedback) showToast("同步完成", "云端词库已更新");
+  } catch (error) {
+    renderSyncStatus("同步失败，稍后会自动重试");
+    if (showFeedback) showToast("同步失败", error.message, "error");
+  } finally {
+    state.cloudSyncing = false;
+    elements.syncNowButton.disabled = false;
+  }
+}
+
+function clearCloudSession(showFeedback = true) {
+  clearTimeout(cloudSyncTimer);
+  state.cloudToken = "";
+  state.cloudUser = null;
+  localStorage.removeItem(CLOUD_TOKEN_KEY);
+  renderAccount();
+  if (showFeedback) showToast("已退出登录", "本机词库仍然保留");
+}
+
 document.querySelectorAll("[data-view]").forEach((button) => {
   button.addEventListener("click", () => switchView(button.dataset.view));
 });
@@ -956,6 +1171,15 @@ elements.vocabularyList.addEventListener("click", (event) => {
   if (deleteButton) deleteEntry(deleteButton.dataset.deleteId);
 });
 
+elements.accountButton.addEventListener("click", openAccountModal);
+elements.closeAccountModal.addEventListener("click", closeAccountModal);
+elements.accountModal.addEventListener("click", (event) => {
+  if (event.target === elements.accountModal) closeAccountModal();
+});
+elements.wechatLoginButton.addEventListener("click", beginWechatLogin);
+elements.syncNowButton.addEventListener("click", () => pushCloudLibrary(true));
+elements.logoutButton.addEventListener("click", () => clearCloudSession(true));
+
 document.addEventListener("keydown", (event) => {
   if (state.currentView !== "quiz") return;
   const tagName = document.activeElement?.tagName;
@@ -983,3 +1207,5 @@ saveEntries();
 renderCounts();
 updateImportPreview();
 renderLibrary();
+renderAccount();
+initializeCloudSession();
