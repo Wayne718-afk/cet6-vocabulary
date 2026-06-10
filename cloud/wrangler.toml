@@ -9,4 +9,4 @@ FRONTEND_PATH = "/cet6-vocabulary/"
 [[d1_databases]]
 binding = "DB"
 database_name = "shici-cloud"
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+database_id = "4cce5fc8-ac41-4878-a092-782de119b283"
