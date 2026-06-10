@@ -1100,6 +1100,27 @@ function clearCloudSession(showFeedback = true) {
   if (showFeedback) showToast("已退出登录", "本机词库仍然保留");
 }
 
+function renderSiteInformation() {
+  const siteInfo = window.SHICI_SITE_INFO || {};
+  const ownerName = String(siteInfo.ownerName || "").trim();
+  const contactEmail = String(siteInfo.contactEmail || "").trim();
+  const icpNumber = String(siteInfo.icpNumber || "").trim();
+  const copyright = document.querySelector("#copyrightText");
+  const contactLink = document.querySelector("#siteContactLink");
+  const icpLink = document.querySelector("#icpLink");
+
+  if (copyright) {
+    copyright.textContent = `© ${new Date().getFullYear()} ${ownerName || "拾词"}`;
+  }
+  if (contactLink && contactEmail) {
+    contactLink.href = `mailto:${contactEmail}`;
+  }
+  if (icpLink && icpNumber) {
+    icpLink.textContent = icpNumber;
+    icpLink.hidden = false;
+  }
+}
+
 document.querySelectorAll("[data-view]").forEach((button) => {
   button.addEventListener("click", () => switchView(button.dataset.view));
 });
@@ -1208,4 +1229,5 @@ renderCounts();
 updateImportPreview();
 renderLibrary();
 renderAccount();
+renderSiteInformation();
 initializeCloudSession();
