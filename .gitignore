@@ -1,2 +1,5 @@
 .wrangler/
 cloud/.wrangler/
+aliyun/node_modules/
+aliyun/.test/
+aliyun/.env
