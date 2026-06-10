@@ -1360,6 +1360,171 @@ svg {
   font-size: 9px;
 }
 
+.site-footer {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto;
+  gap: 14px 30px;
+  max-width: 1180px;
+  margin: 70px auto 0;
+  padding: 25px 2px 5px;
+  color: #738079;
+  border-top: 1px solid rgba(23, 35, 31, 0.1);
+}
+
+.site-footer strong {
+  color: var(--ink);
+  font-family: Georgia, "Noto Serif SC", serif;
+  font-size: 13px;
+}
+
+.site-footer p {
+  margin: 7px 0 0;
+  font-size: 9px;
+}
+
+.site-footer small {
+  grid-column: 1 / -1;
+  font-size: 8px;
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 13px;
+}
+
+.footer-links a {
+  color: var(--ink-soft);
+  font-size: 9px;
+  text-decoration: none;
+}
+
+.footer-links a:hover {
+  color: var(--green);
+  text-decoration: underline;
+}
+
+.legal-page {
+  min-height: 100vh;
+}
+
+.legal-header {
+  display: flex;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 27px 24px;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(23, 35, 31, 0.09);
+}
+
+.legal-brand {
+  color: var(--ink);
+}
+
+.legal-brand strong {
+  display: block;
+  font-family: Georgia, "Noto Serif SC", serif;
+  font-size: 21px;
+}
+
+.legal-brand small {
+  color: var(--ink-soft);
+}
+
+.legal-content {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 70px 24px 100px;
+}
+
+.legal-hero {
+  margin-bottom: 35px;
+}
+
+.legal-hero h1 {
+  margin: 0;
+  font-family: Georgia, "Noto Serif SC", "Songti SC", serif;
+  font-size: clamp(38px, 7vw, 62px);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+}
+
+.legal-hero p {
+  max-width: 620px;
+  margin: 17px 0 0;
+  color: var(--ink-soft);
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+.legal-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-bottom: 25px;
+}
+
+.legal-nav a {
+  padding: 8px 12px;
+  color: var(--green);
+  background: var(--green-pale);
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.legal-card {
+  display: grid;
+  grid-template-columns: 45px minmax(0, 1fr);
+  gap: 20px;
+  margin-bottom: 15px;
+  padding: 28px;
+  background: var(--panel);
+  border: 1px solid rgba(23, 35, 31, 0.1);
+  border-radius: 20px;
+  box-shadow: 0 12px 35px rgba(32, 48, 40, 0.055);
+}
+
+.legal-card > span {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  color: var(--green);
+  background: var(--green-light);
+  border-radius: 50%;
+  font-family: Georgia, serif;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.legal-card h2 {
+  margin: 4px 0 14px;
+  font-family: Georgia, "Noto Serif SC", serif;
+  font-size: 22px;
+}
+
+.legal-card h3 {
+  margin: 18px 0 5px;
+  color: var(--green);
+  font-size: 11px;
+}
+
+.legal-card p {
+  margin: 8px 0;
+  color: var(--ink-soft);
+  font-size: 11px;
+  line-height: 1.85;
+}
+
+.legal-card a {
+  color: var(--green);
+}
+
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -1813,6 +1978,15 @@ svg {
     min-width: 0;
   }
 
+  .site-footer {
+    grid-template-columns: 1fr;
+    margin-top: 50px;
+  }
+
+  .footer-links {
+    justify-content: flex-start;
+  }
+
   .account-modal {
     padding: 34px 24px 28px;
   }
@@ -1872,6 +2046,11 @@ svg {
 
   .vocab-meaning {
     font-size: 10px;
+  }
+
+  .legal-card {
+    grid-template-columns: 1fr;
+    padding: 22px;
   }
 }
 
